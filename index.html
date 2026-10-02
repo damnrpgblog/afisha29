@@ -3,240 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Афиша Челябинска: 03.10 — 09.10</title>
+    <title>Афиша Челябинск</title>
     <style>
         :root {
-            --primary: #004465;
-            --accent: #c45c26;
-            --bg: #ffffff;
-            --white: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius: 12px;
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #ffffff;
+            --card-bg: #f8f9fa;
+            --text-main: #333;
+            --text-muted: #666;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: transparent; 
-            height: auto; 
-            overflow: visible; 
-        }
-
-        .afisha-widget {
-            width: 100%;
-            max-width: 100%;
-            background: var(--bg);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            height: auto;
-        }
-
-        .widget-header {
-            background: var(--primary);
-            color: white;
-            padding: 20px 16px;
-        }
-        .widget-header h2 { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
-        .widget-header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-
-        .days-nav {
-            display: flex;
-            background: var(--white);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
             padding: 10px;
-            gap: 6px;
+            background-color: transparent; /* Для прозрачности в iframe */
+            color: var(--text-main);
+        }
+
+        #widgetRoot {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Навигация (Табы) */
+        .tabs-nav {
+            display: flex;
             overflow-x: auto;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            background: #eee;
+            gap: 2px;
             scrollbar-width: none;
         }
-        .days-nav::-webkit-scrollbar { display: none; }
+        .tabs-nav::-webkit-scrollbar { display: none; }
 
-        .day-btn {
-            flex: 0 0 52px;
-            height: 58px;
+        .tab-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 5px;
+            border: none;
+            background: #eee;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            background: #fff;
-            transition: all 0.2s ease;
         }
-        .day-btn .d-name { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .day-btn .d-num { font-size: 17px; font-weight: 800; color: var(--text-main); }
-        
-        .day-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
-        .day-btn.active .d-name, .day-btn.active .d-num { color: white; }
 
+        .tab-btn.active {
+            background: var(--bg-color);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .tab-btn .date-num { font-weight: bold; font-size: 1.1em; }
+        .tab-btn .day-name { font-size: 0.8em; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Список событий */
         .events-container {
-            padding: 16px;
+            padding: 15px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: auto;
-            overflow: visible;
+            flex-direction: column; /* Всегда в колонку, никакого слайдера */
+            gap: 15px;
+            min-height: 450px; /* Фиксированная минимальная высота, чтобы не "схлопывалось" */
         }
 
         .event-card {
-            background: var(--white);
-            padding: 16px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex-shrink: 0;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0; /* Запрещаем карточке сжиматься */
         }
-        .event-card:hover { border-color: var(--primary); background: #fcfdfe; }
 
-        .card-meta { display: flex; justify-content: space-between; align-items: center; }
-        .meta-left { display: flex; align-items: center; gap: 8px; }
-        .event-cat { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 800; }
-        .event-time { font-size: 11px; font-weight: 700; color: var(--primary); background: #eef6fb; padding: 2px 6px; border-radius: 4px; }
-        .event-age-badge { font-size: 11px; font-weight: 800; color: var(--text-muted); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; }
-        
-        .event-card h3 { font-size: 15px; color: var(--text-main); font-weight: 700; line-height: 1.3; margin: 4px 0; }
-        .event-loc { font-size: 12px; color: var(--text-muted); }
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
 
-        .detail-overlay {
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        .category { color: var(--accent-color); font-weight: bold; text-transform: uppercase; }
+        .age-badge { background: #ddd; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        .event-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .event-info-line {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Деталка (Overlay) */
+        .overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--white);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
             z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
         }
-        .detail-overlay.open { transform: translateX(0); }
 
-        .detail-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; background: #fff; }
-        .back-btn { background: #f1f5f9; border: none; border-radius: 8px; padding: 10px 15px; cursor: pointer; color: var(--primary); font-weight: 700; font-size: 13px; }
+        .detail-card {
+            background: #fff;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+        }
 
-        .detail-content { padding: 24px; overflow-y: auto; flex: 1; }
-        .detail-tag { color: var(--accent); font-weight: 800; font-size: 11px; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .detail-content h2 { font-size: 20px; margin-bottom: 16px; color: var(--text-main); line-height: 1.3; }
-        
-        .detail-desc { font-size: 15.5px; color: #1e293b; line-height: 1.6; margin-bottom: 24px; white-space: pre-line; }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            background: #eee;
+            width: 35px; height: 35px;
+            display: flex; align-items: center;
+            justify-content: center; border-radius: 50%;
+        }
 
-        .info-grid { display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .info-item { font-size: 14px; color: var(--text-main); line-height: 1.4; }
-        .info-item b { color: var(--text-muted); font-weight: 500; min-width: 75px; display: inline-block; }
-        
-        .detail-price-box { font-size: 15px; font-weight: 800; color: var(--primary); background: #f0f7ff; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe; }
+        .detail-desc { line-height: 1.6; margin: 20px 0; color: #444; white-space: pre-wrap; }
 
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .info-box strong { display: block; color: var(--text-muted); margin-bottom: 4px; }
+
+        .price-tag {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="afisha-widget" id="widgetRoot">
-        <header class="widget-header">
-            <h2>Премьера «Грозы», экспрессивный примитивизм и грибной фестиваль</h2>
-            <p>Челябинск: 3 октября — 9 октября</p>
-        </header>
+<div id="widgetRoot">
+    <div class="tabs-nav" id="tabsNav"></div>
+    <div class="events-container" id="eventsList"></div>
+</div>
 
-        <nav class="days-nav" id="daysNav"></nav>
-        <div class="events-container" id="eventsList"></div>
-
-        <div class="detail-overlay" id="detailOverlay">
-            <div class="detail-header">
-                <button class="back-btn" onclick="closeDetail()">← Назад к списку</button>
-            </div>
-            <div class="detail-content" id="detailContent"></div>
-        </div>
+<div class="overlay" id="overlay">
+    <div class="detail-card" id="detailCard">
+        <span class="close-btn" onclick="closeDetails()">&times;</span>
+        <div id="detailContent"></div>
     </div>
+</div>
 
 <script>
-    const eventsData = [
-        // 3 ОКТЯБРЯ
-        { 
-            id: 1, date: '03.10', dayName: 'Сб', cat: 'Экскурсия', name: 'Азбука городского бора', time: '12:00', loc: 'Сбор на остановке «Детский комплекс»', age: '6+', 
-            desc: 'В субботу, 3 октября, в 12:00 состоится авторская экскурсия Елены Кубрак «Азбука городского бора». Участникам представят исторический обзор формирования лесного массива со времен строительства челябинской крепости до современности. Маршрут включает посещение экотропы и Музея леса, где демонстрируются экспонаты, посвященные флоре и фауне региона. Сбор группы на остановке «Детский комплекс». Стоимость — 350–700 руб. 6+',
-            price: '350–700 руб.'
-        },
-        { 
-            id: 2, date: '03.10', dayName: 'Сб', cat: 'Выставка', name: 'Выставка Николая Брежинского', time: '16:00', loc: 'Галерея OkNo', age: '12+', 
-            desc: 'В галерее современного искусства OkNo 3 октября откроется выставка Николая Брежинского «Большой Брежинский или 12 лет спустя». Экспозиция выполнена в стилистике экспрессивного примитивизма. В 16:00 открытие дополнит музыкальный перформанс «DrumТеатр у микрофона» от Нового Художественного Ансамбля. Вход свободный. 12+',
-            price: 'Вход свободный'
-        },
-        { 
-            id: 3, date: '03.10', dayName: 'Сб', cat: 'Фестиваль', name: 'Фестиваль грибов', time: '17:30', loc: 'Галерея «ЛюбаПетя»', age: '16+', 
-            desc: 'В галерее «ЛюбаПетя» 3 октября с 17:30 пройдет «Фестиваль грибов». Программа объединяет лекционную часть о микологии и заготовках грибов на Руси с дегустацией тематических домашних блюд. Организаторы предусмотрели конкурс на лучшее кулинарное изделие. Вход — 300 руб. 16+',
-            price: '300 руб.'
-        },
-        { 
-            id: 4, date: '03.10', dayName: 'Сб', cat: 'Вечеринка', name: 'Октоберфест в Drunke Pub', time: '20:00', loc: 'Бар Drunke Pub', age: '18+', 
-            desc: 'В баре Drunke Pub 3 октября в 20:00 отметят «Октоберфест». В рамках мероприятия запланированы выступления диджеев DASHVILL и DANNY WHITE, тематическое меню и розыгрыш призов. Вход свободный. 18+',
-            price: 'Вход свободный'
-        },
+    const events = [
+        // Суббота 03.10
+        { date: '2026-10-03', time: '12:00', age: '12+', cat: 'Экскурсия', title: 'Азбука городского бора', loc: 'Челябинский бор', price: 'Бесплатно', desc: 'Благотворительная прогулка-лекция об экосистеме челябинского городского бора. Узнаем о редких растениях и истории места. Сбор у памятника Курчатову. Продолжительность 2 часа.' },
+        { date: '2026-10-03', time: '16:00', age: '6+', cat: 'Выставка', title: 'Николай Брежинский: Ретроспектива', loc: 'Галерея OkNo', price: '200 - 400 ₽', desc: 'Открытие выставки известного челябинского художника. В программе: авторская экскурсия и фуршет. Работы охватывают период с 1990 по 2025 годы.' },
+        { date: '2026-10-03', time: '17:30', age: '0+', cat: 'Фестиваль', title: 'Фестиваль грибов и ягод', loc: 'ПКиО им. Гагарина', price: 'Вход свободный', desc: 'Ярмарка местных фермеров, мастер-классы по определению съедобных грибов, дегустация лесного чая и большой концерт фолк-групп.' },
+        { date: '2026-10-03', time: '20:00', age: '18+', cat: 'Вечеринка', title: 'Oktoberfest в Че', loc: 'Бар «Бочка»', price: 'От 1000 ₽', desc: 'Традиционный фестиваль с челябинским колоритом. Живая музыка, конкурсы и специальное меню.' },
+        
+        // Воскресенье 04.10
+        { date: '2026-10-04', time: '16:00', age: '12+', cat: 'Благотворительность', title: 'Тепло в доме Беляевских', loc: 'Ул. Труда, 88', price: 'Донат', desc: 'Архитектурный субботник и чаепитие. Собираем средства на консервацию исторического особняка. Расскажем об особенностях деревянного зодчества Челябинска.' },
+        
+        // Понедельник 05.10
+        { date: '2026-10-05', time: '18:00', age: '16+', cat: 'Лекция', title: 'Кинолекторий: Лана Гогоберидзе', loc: 'Кинотеатр «Пушкина»', price: '300 ₽', desc: 'Разбор творчества классика грузинского кино. Показ фильма «Несколько интервью по личным вопросам».' },
+        
+        // Вторник 06.10
+        { date: '2026-10-06', time: '19:00', age: '12+', cat: 'Образование', title: 'Славянская мифология', loc: 'Лекторий «Свет»', price: '400 ₽', desc: 'Лекция историка о богах, духах и верованиях древних славян. Почему мы до сих пор верим в приметы?' },
+        
+        // Среда 07.10
+        { date: '2026-10-07', time: '10:00', age: '0+', cat: 'Детям', title: 'Приключения Мамонтёнка', loc: 'Кукольный театр', price: '250 - 500 ₽', desc: 'Трогательный спектакль для самых маленьких зрителей о поиске мамы и дружбе.' },
+        { date: '2026-10-07', time: '20:00', age: '16+', cat: 'Концерт', title: 'Группа «Без оглядки»', loc: 'Клуб OZZ', price: '800 ₽', desc: 'Презентация нового альбома челябинских рокеров. Мощный звук и честные тексты.' },
+        
+        // Четверг 08.10
+        { date: '2026-10-08', time: '18:00', age: '16+', cat: 'Театр', title: 'Премьера: «Гроза»', loc: 'Драмтеатр им. Наума Орлова', price: '500 - 2500 ₽', desc: 'Новое прочтение классики Островского. Современные декорации и неожиданные визуальные решения.' },
+        
+        // Пятница 09.10
+        { date: '2026-10-09', time: '18:30', age: '12+', cat: 'Театр', title: 'Продавец дождя', loc: 'Камерный театр', price: '400 - 1200 ₽', desc: 'Притча о вере в чудо. История о том, как в засушливом крае появляется человек, обещающий вызвать дождь.' }
+    ];
 
-        // 4 ОКТЯБРЯ
-        { 
-            id: 5, date: '04.10', dayName: 'Вс', cat: 'Благотворительность', name: 'Вечер «Тепло в доме Беляевских»', time: '16:00', loc: 'Особняк Беляевских (ул. Труда, 89)', age: '18+', 
-            desc: 'В особняке Беляевских (ул. Труда, 89) 4 октября с 16:00 до 22:00 пройдет благотворительный вечер «Тепло в доме Беляевских». Средства от продажи билетов и аукциона работ челябинских художников будут направлены на реставрацию и устройство системы отопления памятника архитектуры. В музыкальной программе примут участие пианист Мураз Шамоев, группа «Была недавно» и диджеи. Вход — 1000 руб.',
-            price: '1000 руб.'
-        },
+    const days = [
+        { date: '2026-10-03', label: 'Сб' },
+        { date: '2026-10-04', label: 'Вс' },
+        { date: '2026-10-05', label: 'Пн' },
+        { date: '2026-10-06', label: 'Вт' },
+        { date: '2026-10-07', label: 'Ср' },
+        { date: '2026-10-08', label: 'Чт' },
+        { date: '2026-10-09', label: 'Пт' }
+    ];
 
-        // 5 ОКТЯБРЯ
-        { 
-            id: 6, date: '05.10', dayName: 'Пн', cat: 'Кино', name: 'Лекция о Лане Гогоберидзе', time: '18:00', loc: 'Киноцентр имени Оболенского', age: '12+', 
-            desc: 'В киноцентре имени Оболенского 5 октября в 18:00 состоится лекция Светланы Ветровой о кинематографе Ланы Гогоберидзе. Исследование сфокусировано на историческом ощущении в работах режиссера 1980-х годов. Вход свободный. 12+',
-            price: 'Вход свободный'
-        },
+    let currentDay = days[0].date;
 
-        // 6 ОКТЯБРЯ
-        { 
-            id: 7, date: '06.10', dayName: 'Вт', cat: 'Образование', name: 'Лекция: Славянская мифология', time: '19:00', loc: 'Лофт 3.17 (ул. Свободы, 2к5)', age: '16+', 
-            desc: 'В лофте 3.17 (ул. Свободы, 2к5) 6 октября в 19:00 пройдет лекция, посвященная славянской мифологии. Темой встречи станут истоки формирования образов низшей мифологии и нечистой силы в народном сознании. Стоимость участия — 800 руб.',
-            price: '800 руб.'
-        },
+    function renderTabs() {
+        const nav = document.getElementById('tabsNav');
+        nav.innerHTML = days.map(d => {
+            const dateObj = new Date(d.date);
+            const dayNum = dateObj.getDate().toString().padStart(2, '0');
+            return `
+                <button class="tab-btn ${d.date === currentDay ? 'active' : ''}" onclick="setDay('${d.date}')">
+                    <span class="day-name">${d.label}</span>
+                    <span class="date-num">${dayNum}.10</span>
+                </button>
+            `;
+        }).join('');
+    }
 
-        // 7 ОКТЯБРЯ
-        { 
-            id: 8, date: '07.10', dayName: 'Ср', cat: 'Кино', name: '«Приключения Мамонтёнка»', time: '10:00', loc: 'Кинотеатры «Киномакс»', age: '6+', 
-            desc: 'В кинотеатрах «Киномакс» с 1 октября вышли в прокат анимационная лента «Приключения Мамонтёнка. В поисках мамы» (6+), являющаяся ремейком советского мультфильма.',
-            price: 'По тарифу кинотеатра'
-        },
-        { 
-            id: 9, date: '07.10', dayName: 'Ср', cat: 'Кино', name: 'Комедия «Без оглядки»', time: '20:00', loc: 'Кинотеатры «Киномакс»', age: '18+', 
-            desc: 'В кинотеатрах «Киномакс» с 1 октября вышла в прокат приключенческая комедия «Без оглядки» с Анной Пересильд и Алексеем Розиным (18+). Сюжет строится вокруг двух соседок, вынужденных скрываться после непреднамеренного правонарушения.',
-            price: 'По тарифу кинотеатра'
-        },
+    function renderEvents() {
+        const container = document.getElementById('eventsList');
+        const filtered = events.filter(e => e.date === currentDay);
+        // Сортировка по времени
+        filtered.sort((a, b) => a.time.localeCompare(b.time));
 
-        // 8 ОКТЯБРЯ
-        { 
-            id: 10, date: '08.10', dayName: 'Чт', cat: 'Премьера', name: 'Спектакль «Гроза»', time: '18:00', loc: 'Молодежный театр', age: '12+', 
-            desc: 'В Молодежном театре 8 октября состоится премьера спектакля «Гроза» по пьесе Александра Островского. Режиссер Дарья Догадова представляет постановку как ностальгическую притчу, где челябинский зритель увидит вымышленный город Калинов в эстетике выжженной земли. Начало в 18:00. 12+ (рекомендовано с 15 лет).',
-            price: 'От 300 руб.'
-        },
-
-        // 9 ОКТЯБРЯ
-        { 
-            id: 11, date: '09.10', dayName: 'Пт', cat: 'Театр', name: 'Комедия «Продавец дождя»', time: '18:30', loc: 'Театр драмы им. Наума Орлова', age: '12+', 
-            desc: 'На большой сцене Челябинского театра драмы им. Наума Орлова покажут романтическую комедию «Продавец дождя» в постановке Александра Зыкова. Стоимость билетов на спектакли — от 300 руб. 12+',
-            price: 'От 300 руб.'
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">Событий на этот день пока нет</div>';
+        } else {
+            container.innerHTML = filtered.map((e, index) => `
+                <div class="event-card" onclick="showDetails('${e.date}', '${e.time}', '${e.title.replace(/'/g, "\\'")}')">
+                    <div class="event-header">
+                        <span class="category">${e.cat}</span>
+                        <span class="age-badge">${e.age}</span>
+                    </div>
+                    <div class="event-title">${e.title}</div>
+                    <div class="event-info-line">
+                        <span>🕒 ${e.time}</span>
+                        <span>📍 ${e.loc}</span>
+                    </div>
+                </div>
+            `).join('');
         }
-    ];
+        sendHeight(); // Сообщаем родителю новую высоту
+    }
 
-    const weekSchedule = [
-        { d: '03.10', n: 'Сб' }, { d: '04.10', n: 'Вс' }, { d: '05.10', n: 'Пн' },
-        { d: '06.10', n: 'Вт' }, { d: '07.10', n: 'Ср' }, { d: '08.10', n: 'Чт' },
-        { d: '09.10', n: 'Пт' }
-    ];
+    function setDay(date) {
+        currentDay = date;
+        renderTabs();
+        renderEvents();
+    }
 
-    let activeDate = '03.10';
+    function showDetails(date, time, title) {
+        const ev = events.find(e => e.date === date && e.time === time && e.title === title);
+        const content = document.getElementById('detailContent');
+        
+        content.innerHTML = `
+            <div class="category" style="margin-bottom:10px">${ev.cat} <span class="age-badge" style="float:right">${ev.age}</span></div>
+            <h2 style="margin-top:0">${ev.title}</h2>
+            
+            <div class="detail-desc">${ev.desc}</div>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <strong>Когда</strong>
+                    ${new Date(ev.date).toLocaleDateString('ru-RU', {day:'numeric', month:'long'})}<br>${ev.time}
+                </div>
+                <div class="info-box">
+                    <strong>Где</strong>
+                    ${ev.loc}
+                </div>
+            </div>
+            
+            <div class="price-tag">Стоимость: ${ev.price}</div>
+        `;
+        
+        document.getElementById('overlay').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 
+    function closeDetails() {
+        document.getElementById('overlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Передача высоты родителю для iframe
     function sendHeight() {
         setTimeout(() => {
             const height = document.getElementById('widgetRoot').offsetHeight;
@@ -244,76 +309,10 @@
         }, 60);
     }
 
-    function initNav() {
-        const nav = document.getElementById('daysNav');
-        weekSchedule.forEach(item => {
-            const btn = document.createElement('div');
-            btn.className = `day-btn ${item.d === activeDate ? 'active' : ''}`;
-            btn.innerHTML = `<span class="d-name">${item.n}</span><span class="d-num">${item.d.split('.')[0]}</span>`;
-            btn.onclick = () => {
-                activeDate = item.d;
-                document.querySelectorAll('.day-btn').forEach(b => 
-                    b.classList.toggle('active', b.querySelector('.d-num').innerText === item.d.split('.')[0])
-                );
-                renderEvents();
-            };
-            nav.appendChild(btn);
-        });
-    }
-
-    function renderEvents() {
-        const container = document.getElementById('eventsList');
-        const filtered = eventsData.filter(e => e.date === activeDate);
-        filtered.sort((a, b) => a.time.localeCompare(b.time));
-
-        if (filtered.length === 0) {
-            container.innerHTML = `<div class="empty-state">Событий не запланировано.<br>Попробуйте другие даты!</div>`;
-        } else {
-            container.innerHTML = filtered.map(evt => `
-                <div class="event-card" onclick="openDetail(${evt.id})">
-                    <div class="card-meta">
-                        <div class="meta-left">
-                            <span class="event-cat">${evt.cat}</span>
-                            <span class="event-time">${evt.time}</span>
-                        </div>
-                        <span class="event-age-badge">${evt.age}</span>
-                    </div>
-                    <h3>${evt.name}</h3>
-                    <div class="event-loc">📍 ${evt.loc}</div>
-                </div>
-            `).join('');
-        }
-        sendHeight();
-    }
-
-    window.openDetail = function(id) {
-        const evt = eventsData.find(e => e.id === id);
-        const content = document.getElementById('detailContent');
-        content.innerHTML = `
-            <span class="detail-tag">${evt.cat} | Возраст: ${evt.age}</span>
-            <h2>${evt.name}</h2>
-            
-            <div class="detail-desc">${evt.desc}</div>
-
-            <div class="info-grid">
-                <div class="info-item"><b>Когда:</b> ${evt.date} (${evt.dayName}) в ${evt.time}</div>
-                <div class="info-item"><b>Где:</b> ${evt.loc}</div>
-            </div>
-
-            <div class="detail-price-box">Стоимость: ${evt.price}</div>
-
-            <button onclick="closeDetail()" style="width: 100%; margin-top: 25px; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700;">Вернуться к списку</button>
-        `;
-        document.getElementById('detailOverlay').classList.add('open');
-    };
-
-    window.closeDetail = function() {
-        document.getElementById('detailOverlay').classList.remove('open');
-    };
-
-    window.addEventListener('resize', sendHeight);
-    initNav();
+    // Инициализация
+    renderTabs();
     renderEvents();
+    window.addEventListener('resize', sendHeight);
 </script>
 
 </body>
