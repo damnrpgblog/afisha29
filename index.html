@@ -18,7 +18,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            background-color: transparent; /* Для прозрачности в iframe */
+            background-color: transparent;
             color: var(--text-main);
         }
 
@@ -66,9 +66,9 @@
         .events-container {
             padding: 15px;
             display: flex;
-            flex-direction: column; /* Всегда в колонку, никакого слайдера */
+            flex-direction: column; 
             gap: 15px;
-            min-height: 450px; /* Фиксированная минимальная высота, чтобы не "схлопывалось" */
+            min-height: 500px; /* Удерживает форму, если событий мало */
         }
 
         .event-card {
@@ -80,7 +80,7 @@
             cursor: pointer;
             border-left: 4px solid var(--primary-color);
             transition: transform 0.2s, box-shadow 0.2s;
-            flex-shrink: 0; /* Запрещаем карточке сжиматься */
+            flex-shrink: 0;
         }
 
         .event-card:hover {
@@ -117,7 +117,7 @@
         .overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             display: none;
             z-index: 1000;
             padding: 20px;
@@ -131,17 +131,33 @@
             border-radius: 12px;
             padding: 25px;
             position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 15px;
-            font-size: 24px;
+        /* Новая кнопка "Назад" */
+        .back-btn-container {
+            margin-top: 25px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            background: #eee;
-            width: 35px; height: 35px;
-            display: flex; align-items: center;
-            justify-content: center; border-radius: 50%;
+            transition: background 0.3s;
+            text-align: center;
+        }
+
+        .back-btn:hover {
+            background: #34495e;
         }
 
         .detail-desc { line-height: 1.6; margin: 20px 0; color: #444; white-space: pre-wrap; }
@@ -177,36 +193,25 @@
 
 <div class="overlay" id="overlay">
     <div class="detail-card" id="detailCard">
-        <span class="close-btn" onclick="closeDetails()">&times;</span>
         <div id="detailContent"></div>
+        <div class="back-btn-container">
+            <button class="back-btn" onclick="closeDetails()">← Назад на афишу</button>
+        </div>
     </div>
 </div>
 
 <script>
     const events = [
-        // Суббота 03.10
         { date: '2026-10-03', time: '12:00', age: '12+', cat: 'Экскурсия', title: 'Азбука городского бора', loc: 'Челябинский бор', price: 'Бесплатно', desc: 'Благотворительная прогулка-лекция об экосистеме челябинского городского бора. Узнаем о редких растениях и истории места. Сбор у памятника Курчатову. Продолжительность 2 часа.' },
         { date: '2026-10-03', time: '16:00', age: '6+', cat: 'Выставка', title: 'Николай Брежинский: Ретроспектива', loc: 'Галерея OkNo', price: '200 - 400 ₽', desc: 'Открытие выставки известного челябинского художника. В программе: авторская экскурсия и фуршет. Работы охватывают период с 1990 по 2025 годы.' },
         { date: '2026-10-03', time: '17:30', age: '0+', cat: 'Фестиваль', title: 'Фестиваль грибов и ягод', loc: 'ПКиО им. Гагарина', price: 'Вход свободный', desc: 'Ярмарка местных фермеров, мастер-классы по определению съедобных грибов, дегустация лесного чая и большой концерт фолк-групп.' },
         { date: '2026-10-03', time: '20:00', age: '18+', cat: 'Вечеринка', title: 'Oktoberfest в Че', loc: 'Бар «Бочка»', price: 'От 1000 ₽', desc: 'Традиционный фестиваль с челябинским колоритом. Живая музыка, конкурсы и специальное меню.' },
-        
-        // Воскресенье 04.10
         { date: '2026-10-04', time: '16:00', age: '12+', cat: 'Благотворительность', title: 'Тепло в доме Беляевских', loc: 'Ул. Труда, 88', price: 'Донат', desc: 'Архитектурный субботник и чаепитие. Собираем средства на консервацию исторического особняка. Расскажем об особенностях деревянного зодчества Челябинска.' },
-        
-        // Понедельник 05.10
         { date: '2026-10-05', time: '18:00', age: '16+', cat: 'Лекция', title: 'Кинолекторий: Лана Гогоберидзе', loc: 'Кинотеатр «Пушкина»', price: '300 ₽', desc: 'Разбор творчества классика грузинского кино. Показ фильма «Несколько интервью по личным вопросам».' },
-        
-        // Вторник 06.10
         { date: '2026-10-06', time: '19:00', age: '12+', cat: 'Образование', title: 'Славянская мифология', loc: 'Лекторий «Свет»', price: '400 ₽', desc: 'Лекция историка о богах, духах и верованиях древних славян. Почему мы до сих пор верим в приметы?' },
-        
-        // Среда 07.10
         { date: '2026-10-07', time: '10:00', age: '0+', cat: 'Детям', title: 'Приключения Мамонтёнка', loc: 'Кукольный театр', price: '250 - 500 ₽', desc: 'Трогательный спектакль для самых маленьких зрителей о поиске мамы и дружбе.' },
         { date: '2026-10-07', time: '20:00', age: '16+', cat: 'Концерт', title: 'Группа «Без оглядки»', loc: 'Клуб OZZ', price: '800 ₽', desc: 'Презентация нового альбома челябинских рокеров. Мощный звук и честные тексты.' },
-        
-        // Четверг 08.10
         { date: '2026-10-08', time: '18:00', age: '16+', cat: 'Театр', title: 'Премьера: «Гроза»', loc: 'Драмтеатр им. Наума Орлова', price: '500 - 2500 ₽', desc: 'Новое прочтение классики Островского. Современные декорации и неожиданные визуальные решения.' },
-        
-        // Пятница 09.10
         { date: '2026-10-09', time: '18:30', age: '12+', cat: 'Театр', title: 'Продавец дождя', loc: 'Камерный театр', price: '400 - 1200 ₽', desc: 'Притча о вере в чудо. История о том, как в засушливом крае появляется человек, обещающий вызвать дождь.' }
     ];
 
@@ -239,13 +244,12 @@
     function renderEvents() {
         const container = document.getElementById('eventsList');
         const filtered = events.filter(e => e.date === currentDay);
-        // Сортировка по времени
         filtered.sort((a, b) => a.time.localeCompare(b.time));
 
         if (filtered.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">Событий на этот день пока нет</div>';
         } else {
-            container.innerHTML = filtered.map((e, index) => `
+            container.innerHTML = filtered.map(e => `
                 <div class="event-card" onclick="showDetails('${e.date}', '${e.time}', '${e.title.replace(/'/g, "\\'")}')">
                     <div class="event-header">
                         <span class="category">${e.cat}</span>
@@ -259,7 +263,7 @@
                 </div>
             `).join('');
         }
-        sendHeight(); // Сообщаем родителю новую высоту
+        sendHeight();
     }
 
     function setDay(date) {
@@ -301,15 +305,13 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Передача высоты родителю для iframe
     function sendHeight() {
         setTimeout(() => {
             const height = document.getElementById('widgetRoot').offsetHeight;
             window.parent.postMessage({ frameHeight: height }, '*');
-        }, 60);
+        }, 70);
     }
 
-    // Инициализация
     renderTabs();
     renderEvents();
     window.addEventListener('resize', sendHeight);
